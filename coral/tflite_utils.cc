@@ -46,8 +46,8 @@ TfLiteAffineQuantization* TfLiteAffineQuantizationCopy(
   auto* copy = static_cast<TfLiteAffineQuantization*>(
       malloc(sizeof(TfLiteAffineQuantization)));
   CHECK(copy);
-  copy->scale = TfLiteFloatArrayCopy(src->scale);
-  copy->zero_point = TfLiteIntArrayCopy(src->zero_point);
+  copy->scale = ::TfLiteFloatArrayCopy(src->scale);
+  copy->zero_point = ::TfLiteIntArrayCopy(src->zero_point);
   copy->quantized_dimension = src->quantized_dimension;
   return copy;
 }

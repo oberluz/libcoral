@@ -8,14 +8,16 @@ RUN dpkg --add-architecture armhf
 RUN dpkg --add-architecture arm64
 RUN echo 'APT::Immediate-Configure false;' >> /etc/apt/apt.conf
 
-RUN apt-get update \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
       libc6-dev:arm64 \
-      libc6-dev:armhf \
-    && DEBIAN_FRONTEND=noninteractive apt-get install -y \
+      libc6-dev:armhf
+
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-all bc && \
+    PYTHON_VERSION=$(/usr/bin/python3 --version | cut -d '.' -f 2); echo ${PYTHON_VERSION}; \
+    if [ $(echo "${PYTHON_VERSION} < 9" | bc -l) -ne 0 ]; then  PACKAGES="python";  else  PACKAGES="python-is-python3"; fi && \
+    PACKAGES="${PACKAGES} \
       sudo \
       debhelper \
-      python \
       python3-all \
       python3-numpy \
       python3-setuptools \
@@ -42,7 +44,8 @@ RUN apt-get update \
       git \
       vim \
       mc \
-      software-properties-common
+      software-properties-common" && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y ${PACKAGES}
 
 # Bionic Beaver == Ubuntu 18.04
 RUN if grep 'Bionic Beaver' /etc/os-release > /dev/null; then \
@@ -78,7 +81,7 @@ RUN git clone https://github.com/raspberrypi/tools.git && \
     cd tools && \
     git reset --hard 4a335520900ce55e251ac4f420f52bf0b2ab6b1f
 
-ARG BAZEL_VERSION=4.0.0
+ARG BAZEL_VERSION=5.3.0
 RUN wget -O /bazel https://github.com/bazelbuild/bazel/releases/download/${BAZEL_VERSION}/bazel-${BAZEL_VERSION}-installer-linux-x86_64.sh && \
     bash /bazel && \
     rm -f /bazel
